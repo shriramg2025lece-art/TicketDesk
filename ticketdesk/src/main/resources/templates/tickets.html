@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Tickets - College TicketDesk</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: nav}"></div>
+  <div class="main">
+    <div class="topbar">
+      <h2>Tickets</h2>
+      <form method="post" th:action="@{/logout}">
+        <button type="submit">Logout (<span sec:authentication="name">user</span>)</button>
+      </form>
+    </div>
+
+    <div class="filter-bar">
+      <a class="btn secondary" th:href="@{/tickets}">All</a>
+      <a class="btn secondary" th:each="s : ${statuses}" th:href="@{/tickets(status=${s})}" th:text="${s}">STATUS</a>
+      <a class="btn" th:href="@{/tickets/new}">+ New Ticket</a>
+    </div>
+
+    <div class="panel">
+      <h3 th:text="${selectedStatus == null} ? 'All tickets' : 'Status: ' + ${selectedStatus}">All tickets</h3>
+      <p th:if="${#lists.isEmpty(tickets)}" style="color:var(--muted);">No tickets found.</p>
+      <table th:if="${!#lists.isEmpty(tickets)}">
+        <thead>
+          <tr><th>#</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Raised by</th><th>Assigned to</th><th>Created</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="t : ${tickets}">
+            <td th:text="${t.id}">1</td>
+            <td><a class="link" th:href="@{/tickets/{id}(id=${t.id})}" th:text="${t.title}">title</a></td>
+            <td th:text="${t.category}">cat</td>
+            <td><span class="badge" th:classappend="${t.priority}" th:text="${t.priority}">P</span></td>
+            <td><span class="badge" th:classappend="${t.status}" th:text="${t.status}">S</span></td>
+            <td th:text="${t.createdBy.fullName}">name</td>
+            <td th:text="${t.assignedTo != null} ? ${t.assignedTo.fullName} : 'Unassigned'">-</td>
+            <td th:text="${#temporals.format(t.createdAt, 'dd MMM HH:mm')}">time</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

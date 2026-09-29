@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ticket - College TicketDesk</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: nav}"></div>
+  <div class="main">
+    <div class="topbar">
+      <h2 th:text="'Ticket #' + ${ticket.id}">Ticket</h2>
+      <form method="post" th:action="@{/logout}">
+        <button type="submit">Logout (<span sec:authentication="name">user</span>)</button>
+      </form>
+    </div>
+
+    <div class="alert-msg" th:if="${param.created}">Ticket submitted successfully.</div>
+
+    <div class="panel">
+      <h3 th:text="${ticket.title}">Title</h3>
+      <div>
+        <span class="badge" th:classappend="${ticket.status}" th:text="${ticket.status}">S</span>
+        <span class="badge" th:classappend="${ticket.priority}" th:text="${ticket.priority}">P</span>
+      </div>
+      <div class="meta-grid">
+        <div><div class="k">Category</div><div th:text="${ticket.category}">cat</div></div>
+        <div><div class="k">Raised by</div><div th:text="${ticket.createdBy.fullName}">name</div></div>
+        <div><div class="k">Assigned to</div>
+          <div th:text="${ticket.assignedTo != null} ? ${ticket.assignedTo.fullName} : 'Unassigned'">-</div></div>
+        <div><div class="k">Created</div><div th:text="${#temporals.format(ticket.createdAt, 'dd MMM yyyy, HH:mm')}">t</div></div>
+        <div><div class="k">Last updated</div><div th:text="${#temporals.format(ticket.updatedAt, 'dd MMM yyyy, HH:mm')}">t</div></div>
+      </div>
+      <p style="white-space:pre-wrap;" th:text="${ticket.description}">description</p>
+    </div>
+
+    <!-- Staff / admin controls -->
+    <div class="panel" th:if="${isStaff}">
+      <h3>Manage ticket</h3>
+      <form class="inline-form" method="post" th:action="@{/tickets/{id}/status(id=${ticket.id})}">
+        <div class="field">
+          <label>Change status</label>
+          <select name="status">
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == ticket.status}">S</option>
+          </select>
+        </div>
+        <button class="btn" type="submit">Update status</button>
+      </form>
+      <form class="inline-form" method="post" th:action="@{/tickets/{id}/assign(id=${ticket.id})}">
+        <div class="field">
+          <label>Assign to</label>
+          <select name="assigneeId">
+            <option th:each="u : ${staffUsers}" th:value="${u.id}" th:text="${u.fullName}"
+                    th:selected="${ticket.assignedTo != null and ticket.assignedTo.id == u.id}">user</option>
+          </select>
+        </div>
+        <button class="btn secondary" type="submit">Assign</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h3>Comments</h3>
+      <p th:if="${#lists.isEmpty(comments)}" style="color:var(--muted);">No comments yet.</p>
+      <div class="comment" th:each="c : ${comments}">
+        <div class="who"><span th:text="${c.author.fullName}">Author</span>
+          <span class="when" th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy, HH:mm')}">time</span></div>
+        <p th:text="${c.text}">text</p>
+      </div>
+
+      <form method="post" th:action="@{/tickets/{id}/comments(id=${ticket.id})}" style="margin-top:16px;">
+        <div class="field">
+          <label>Add a comment</label>
+          <textarea name="text" rows="3" maxlength="1000" required="required"></textarea>
+        </div>
+        <button class="btn" type="submit">Post comment</button>
+        <a class="btn secondary" style="text-decoration:none; display:inline-block;" th:href="@{/tickets}">Back to tickets</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

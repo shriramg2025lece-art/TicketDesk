@@ -1,0 +1,15 @@
+<div th:fragment="nav" class="sidebar" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <div class="brand">
+    <h1>College<br/>TicketDesk</h1>
+    <span>Support ticket system</span>
+  </div>
+  <nav class="nav">
+    <a th:href="@{/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'">Dashboard</a>
+    <a th:href="@{/tickets}" th:classappend="${activePage == 'tickets'} ? 'active'">
+      <span sec:authorize="hasAnyRole('STAFF','ADMIN')">All Tickets</span>
+      <span sec:authorize="hasRole('STUDENT')">My Tickets</span>
+    </a>
+    <a th:href="@{/tickets/new}" th:classappend="${activePage == 'new'} ? 'active'">New Ticket</a>
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" th:classappend="${activePage == 'users'} ? 'active'">Users</a>
+  </nav>
+</div>

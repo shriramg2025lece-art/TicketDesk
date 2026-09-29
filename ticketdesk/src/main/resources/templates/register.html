@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Register - College TicketDesk</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-box">
+      <h1>Student Registration</h1>
+      <p class="sub">Create an account to raise tickets</p>
+
+      <div class="error-msg" th:if="${#fields.hasErrors('${form.*}')}">
+        <div th:each="e : ${#fields.errors('${form.*}')}" th:text="${e}">error</div>
+      </div>
+
+      <form method="post" th:action="@{/register}" th:object="${form}">
+        <div class="field" style="margin-bottom:14px;">
+          <label>Full name</label>
+          <input type="text" th:field="*{fullName}"/>
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>Username</label>
+          <input type="text" th:field="*{username}"/>
+        </div>
+        <div class="field" style="margin-bottom:6px;">
+          <label>Password (min 6 characters)</label>
+          <input type="password" th:field="*{password}"/>
+        </div>
+        <button class="btn" type="submit" style="width:100%;">Register</button>
+      </form>
+      <p style="color:var(--muted); font-size:13px; margin-top:16px;">
+        Already have an account? <a class="link" th:href="@{/login}">Sign in</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

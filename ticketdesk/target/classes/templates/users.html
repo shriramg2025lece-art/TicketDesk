@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Users - College TicketDesk</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: nav}"></div>
+  <div class="main">
+    <div class="topbar">
+      <h2>User Management</h2>
+      <form method="post" th:action="@{/logout}">
+        <button type="submit">Logout (<span sec:authentication="name">user</span>)</button>
+      </form>
+    </div>
+
+    <div class="alert-msg" th:if="${message}" th:text="${message}">ok</div>
+    <div class="error-msg" th:if="${error}" th:text="${error}">error</div>
+
+    <div class="panel">
+      <h3>Create user</h3>
+      <form method="post" th:action="@{/admin/users}">
+        <div class="form-grid">
+          <div class="field"><label>Full name</label><input type="text" name="fullName" required="required"/></div>
+          <div class="field"><label>Username</label><input type="text" name="username" required="required"/></div>
+          <div class="field"><label>Password (min 6)</label><input type="password" name="password" required="required"/></div>
+          <div class="field"><label>Role</label>
+            <select name="role">
+              <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROLE</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn" type="submit">Create user</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h3>All users</h3>
+      <table>
+        <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="u : ${users}">
+            <td th:text="${u.username}">user</td>
+            <td th:text="${u.fullName}">name</td>
+            <td th:text="${u.role}">ROLE</td>
+            <td><span class="badge" th:classappend="${u.enabled} ? 'RESOLVED' : 'CLOSED'" th:text="${u.enabled} ? 'ACTIVE' : 'DISABLED'">ACTIVE</span></td>
+            <td>
+              <form method="post" th:action="@{/admin/users/{id}/toggle(id=${u.id})}" style="margin:0;">
+                <button class="btn secondary" type="submit" style="margin:0; padding:5px 12px;"
+                        th:text="${u.enabled} ? 'Disable' : 'Enable'">Disable</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

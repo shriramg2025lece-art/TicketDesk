@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Dashboard - College TicketDesk</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: nav}"></div>
+  <div class="main">
+    <div class="topbar">
+      <h2>Dashboard</h2>
+      <form method="post" th:action="@{/logout}">
+        <button type="submit">Logout (<span sec:authentication="name">user</span>)</button>
+      </form>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="label">Total Tickets</div><div class="value" th:text="${total}">0</div></div>
+      <div class="card"><div class="label">Open</div><div class="value" th:text="${open}">0</div></div>
+      <div class="card"><div class="label">In Progress</div><div class="value" th:text="${inProgress}">0</div></div>
+      <div class="card"><div class="label">Resolved</div><div class="value" th:text="${resolved}">0</div></div>
+      <div class="card"><div class="label">Closed</div><div class="value" th:text="${closed}">0</div></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="panel">
+        <h3>Tickets by Status</h3>
+        <p th:if="${total == 0}" style="color:var(--muted);">No tickets yet.</p>
+        <canvas id="pieChart" height="150" th:if="${total > 0}"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Tickets by Category</h3>
+        <p th:if="${total == 0}" style="color:var(--muted);">No tickets yet.</p>
+        <canvas id="barChart" height="150" th:if="${total > 0}"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Recent Tickets</h3>
+      <p th:if="${#lists.isEmpty(recent)}" style="color:var(--muted);">
+        No tickets yet. <a class="link" th:href="@{/tickets/new}">Create one</a>.
+      </p>
+      <table th:if="${!#lists.isEmpty(recent)}">
+        <thead><tr><th>#</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead>
+        <tbody>
+          <tr th:each="t : ${recent}">
+            <td th:text="${t.id}">1</td>
+            <td><a class="link" th:href="@{/tickets/{id}(id=${t.id})}" th:text="${t.title}">title</a></td>
+            <td th:text="${t.category}">cat</td>
+            <td><span class="badge" th:classappend="${t.priority}" th:text="${t.priority}">P</span></td>
+            <td><span class="badge" th:classappend="${t.status}" th:text="${t.status}">S</span></td>
+            <td th:text="${#temporals.format(t.createdAt, 'dd MMM HH:mm')}">time</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Chart.js (needs internet) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script th:inline="javascript">
+    // Data sent from DashboardController
+    const statusLabels   = /*[[${statusLabels}]]*/ [];
+    const statusCounts   = /*[[${statusCounts}]]*/ [];
+    const categoryLabels = /*[[${categoryLabels}]]*/ [];
+    const categoryCounts = /*[[${categoryCounts}]]*/ [];
+
+    Chart.defaults.color = '#8fa3b8';
+
+    // Pie chart: tickets by status
+    const pie = document.getElementById('pieChart');
+    if (pie) {
+      new Chart(pie, {
+        type: 'pie',
+        data: {
+          labels: statusLabels,
+          datasets: [{ data: statusCounts, backgroundColor: ['#f5b942', '#4fc3f7', '#2dd4bf', '#8fa3b8'] }]
+        }
+      });
+    }
+
+    // Bar chart: tickets by category
+    const bar = document.getElementById('barChart');
+    if (bar) {
+      new Chart(bar, {
+        type: 'bar',
+        data: {
+          labels: categoryLabels,
+          datasets: [{ label: 'Tickets', data: categoryCounts, backgroundColor: '#ff7a45' }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+      });
+    }
+  </script>
+</body>
+</html>
